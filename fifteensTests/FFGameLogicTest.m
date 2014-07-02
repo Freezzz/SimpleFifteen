@@ -35,24 +35,24 @@
 
 - (void)testMovement {
     // We have:
-    // 0 1 2
-    // 3 4 5
-    // 6 7 8
+    // 1 2 3
+    // 4 5 6
+    // 7 8 0
     NSMutableArray * referenceDeck = [self.gameLogic.deck mutableCopy];
     
-    // Move 1 to 0
-    XCTAssertTrue([self.gameLogic moveCellAtIndex:1] == 0, @"Cell 1 should move to position 0");
-    [referenceDeck exchangeObjectAtIndex:0 withObjectAtIndex:1];
+    // Move 8 to 0
+    XCTAssertTrue([self.gameLogic moveCellAtIndex:7] == 8, @"Cell 1 should move to position 0");
+    [referenceDeck exchangeObjectAtIndex:7 withObjectAtIndex:8];
     
     XCTAssertTrue([self.gameLogic.deck isEqualToArray:referenceDeck], @"Cell 1 was not moved");
     
     // We have:
-    // 1 0 2
-    // 3 4 5
-    // 6 7 8
-    // Try to move 8
-    XCTAssertTrue([self.gameLogic moveCellAtIndex:8] == -1, @"-1 is exped as sign of not moving");
-    XCTAssertTrue([self.gameLogic.deck isEqualToArray:referenceDeck], @"Cell 8 should not move");
+    // 1 2 3
+    // 4 5 6
+    // 7 8 0
+    // Try to move 1
+    XCTAssertTrue([self.gameLogic moveCellAtIndex:1] == -1, @"-1 is exped as sign of not moving");
+    XCTAssertTrue([self.gameLogic.deck isEqualToArray:referenceDeck], @"Cell 1 should not move");
     
     
     XCTAssertTrue([self.gameLogic moveCellAtIndex:499] == -1, @"-1 when value is out of range");
