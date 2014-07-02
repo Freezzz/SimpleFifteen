@@ -13,6 +13,7 @@
 
 - (NSInteger)nextPositionForCellAtPath:(NSUInteger)path;
 - (BOOL)victoryConditionMatched;
+- (BOOL)validateSolvability;
 @end
 
 @implementation FFGameLogic
@@ -21,9 +22,11 @@
     if (self = [super init]) {
         self.deck = [[NSMutableArray alloc] init];
         
-        for (NSUInteger i = 0; i < cellCount; i++) {
+        for (NSUInteger i = 1; i < cellCount; i++) {
             [self.deck addObject:@(i)];
         }
+        [self.deck addObject:@(0)];
+        
         
         self.rowSize = (NSInteger) roundf(sqrt(cellCount));
 
@@ -40,12 +43,58 @@
         NSInteger shuffledIndex = arc4random_uniform(count);
         [self.deck exchangeObjectAtIndex:i withObjectAtIndex:shuffledIndex];
     }
+    
+    // Check if generated deck is solvable
+    if (![self validateSolvability]) {
+        // To get solvable deck from unsolvable we need to exchange two ajacent cells
+        [self.deck exchangeObjectAtIndex:0 withObjectAtIndex:1];
+    }
+}
+
+- (BOOL)validateSolvability {
+    // Calculate inversions
+    NSUInteger inversionCount = 0;
+    NSUInteger inverseZeroRowNumber = -1; // row position of empty slot counting from bottom
+    
+    for (NSUInteger i = 0; i < self.deck.count; i++) {
+        NSUInteger value = [self.deck[i] intValue];
+        for (NSUInteger j = i+1; j < self.deck.count; j++) {
+            NSUInteger subValue = [self.deck[j] intValue];
+            if (value >  subValue && subValue != 0){
+                inversionCount ++;
+            }
+        }
+        
+        if (inverseZeroRowNumber == -1 && value == 0) {
+            inverseZeroRowNumber = self.rowSize - (i / self.rowSize);
+        }
+    }
+    
+    // Case when row width is odd
+    if (self.rowSize % 2 == 1) {
+        return (inversionCount % 2 == 0); // Sovable if even
+    }
+    
+    
+    // Case when row width is even
+    if (inverseZeroRowNumber % 2 == 0) {
+        return (inversionCount % 2 == 1); // Sovable is odd
+    } else {
+        return (inversionCount % 2 == 0); // Sovable is even
+    }
 }
 
 #pragma mark - Victory conditions
 - (BOOL)victoryConditionMatched {
     NSNumber * prevNumber = self.deck[0];
-    for (NSUInteger i = 1; i < self.deck.count - 1; i++) {
+    
+    // Check if empty cell is in first postion
+    if (prevNumber.intValue == 0) {
+        return false;
+    }
+    
+    // Validate that deck is ascending
+    for (NSUInteger i = 0; i < self.deck.count - 1; i++) {
         
         // Cells value shoulb lower than previous
         NSNumber * currentNumber = self.deck[i];
